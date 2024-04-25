@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "217866143817",
+    "project_id": "ashiq-project-notes",
+    "storage_bucket": "ashiq-project-notes.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:217866143817:android:dde0ea7f82d1eb80cc5798",
+        "android_client_info": {
+          "package_name": "com.ashiq.mynotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBifBEAh-iHlPMhCE2SmvJBCC5QFvz-yqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/firebase_options.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/register_view.dart';
+import 'package:mynotes/views/verify_email_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,13 +37,26 @@ class HomePage extends StatelessWidget {
           // case ConnectionState.waiting:
           // case ConnectionState.active:
           case ConnectionState.done:
-            // final user = FirebaseAuth.instance.currentUser;
-            // print(user);
-            // if (user?.emailVerified ?? false) {
-            //   return const Text("Done");
-            // } else {
-            //   return const VerifyEmailView();
-            // }
+            final user = FirebaseAuth.instance.currentUser;
+
+            if (user != null) {
+              if (user.emailVerified) {
+                return Scaffold(
+                    appBar: AppBar(
+                      title: const Text("Verified"),
+                      shadowColor: Colors.black,
+                      elevation: 10,
+                      foregroundColor: Colors.amber,
+                      backgroundColor: Colors.red,
+                    ),
+                    body: const Text("Done"));
+              } else {
+                return const VerifyEmailView();
+              }
+            } else {
+              return const LoginView();
+            }
+
 /*
             Anonymous Route
               Navigator.of(context).push(
@@ -50,7 +64,7 @@ class HomePage extends StatelessWidget {
                     builder: (context) => const VerifyEmailView()),
               );
 */
-            return const LoginView();
+
           default:
             return const Scaffold(
               body: CircularProgressIndicator(),

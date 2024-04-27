@@ -74,6 +74,11 @@ class FirebaseAuthProvider implements AuthProvider {
     required String password,
   }) async {
     try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
       final user = currentUser;
 
       if (user != null) {
@@ -98,7 +103,7 @@ class FirebaseAuthProvider implements AuthProvider {
   Future<void> logOut() async {
     final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) {
+    if (user != null) {
       await FirebaseAuth.instance.signOut();
     } else {
       throw UserNotLoggedInAuthException();

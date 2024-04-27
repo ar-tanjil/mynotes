@@ -1,4 +1,6 @@
 // import 'dart:developer' as dev show log;
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_exception.dart';
@@ -68,6 +70,8 @@ class _LoginViewState extends State<LoginView> {
                   );
 
                   final user = AuthService.firebase().currentUser;
+
+                  log(user.toString());
 
                   if (user?.isEmailVerified ?? false) {
                     Navigator.of(context).pushNamedAndRemoveUntil(

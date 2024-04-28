@@ -48,7 +48,10 @@ class _NewNoteViewState extends State<NewNoteView> {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _noteService.getUser(email: email);
-    return await _noteService.createNote(user: owner);
+    print(owner);
+    var v = await _noteService.createNote(user: owner);
+    print("ddd");
+    return v;
   }
 
   void _deleteNoteIfTextIsEmpty() {

@@ -13,11 +13,16 @@ class NoteService {
 
 // Singleton
   static final NoteService _shared = NoteService._sharedInstance();
-  NoteService._sharedInstance();
+  NoteService._sharedInstance() {
+    _noteStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _noteStreamController.sink.add(_notes);
+      },
+    );
+  }
   factory NoteService() => _shared;
 // -----
-  final _noteStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _noteStreamController;
 
   Stream<List<DatabaseNote>> get allNotes => _noteStreamController.stream;
 
@@ -145,14 +150,16 @@ class NoteService {
 // Note servcie
 
   Future<DatabaseNote> createNote({required DatabaseUser user}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+
     final dbUser = await getUser(email: user.email);
 
-    if (dbUser == user) {
+    if (dbUser != user) {
       throw CouldNotFindUser();
     }
 
-    var text = "";
+    var text = '';
 
     final noteId = await db.insert(
       noteTable,
@@ -322,23 +329,23 @@ class DatabaseNote {
 }
 
 const dbName = "notes.db";
-const noteTable = "note";
+const noteTable = "notes";
 const userTable = "user";
 const idColumn = "id";
 const emailColumn = "email";
 const userIdColumn = "user_id";
 const textColumn = "text";
-const syncColumn = "is_sync_with_cloud";
-const createUserTable = ''' CREATE TABLE "user" IF NOT EXISTS (
-    	" id"	INTEGER NOT NULL,
-	    "eamil"	TEXT NOT NULL UNIQUE,
-	    PRIMARY KEY(" id" AUTOINCREMENT));''';
+const syncColumn = "is_sync";
+const createUserTable = ''' CREATE TABLE IF NOT EXISTS "user"  (
+    	"id"	INTEGER NOT NULL,
+	    "email"	TEXT NOT NULL UNIQUE,
+	    PRIMARY KEY("id" AUTOINCREMENT));''';
 
-const createNoteTable = '''CREATE TABLE "notes" IF NOT EXISTS (
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "notes" (
 	  "id"	INTEGER NOT NULL,
 	  "user_id"	INTEGER,
 	  "text"	TEXT,
 	  "is_sync"	INTEGER DEFAULT 0,
 	  PRIMARY KEY("id" AUTOINCREMENT),
-	  FOREIGN KEY("user_id") REFERENCES "user"(" id")
+	  FOREIGN KEY("user_id") REFERENCES "user"("id")
 );''';

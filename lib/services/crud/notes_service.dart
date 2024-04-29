@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:mynotes/extension/list/filter.dart';
 import 'package:mynotes/services/crud/crud_exception.dart';
 import "package:sqflite/sqflite.dart";
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart'
     show MissingPlatformDirectoryException, getApplicationDocumentsDirectory;
+import 'package:sqflite/sqlite_api.dart';
 
 class NoteService {
   Database? _db;
 
   List<DatabaseNote> _notes = [];
+
+  DatabaseUser? _user;
 
 // Singleton
   static final NoteService _shared = NoteService._sharedInstance();
@@ -24,7 +28,15 @@ class NoteService {
 // -----
   late final StreamController<List<DatabaseNote>> _noteStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _noteStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _noteStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeCreateNote();
+        }
+      });
 
   Future<void> _cacheNotes() async {
     final allNotes = await getAllNotes();
@@ -32,12 +44,21 @@ class NoteService {
     _noteStreamController.add(_notes);
   }
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUser {
       final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -252,10 +273,14 @@ class NoteService {
 
     await getNotes(id: note.id);
 
-    final updateCount = await db.update(noteTable, {
-      textColumn: text,
-      syncColumn: 0,
-    });
+    final updateCount = await db.update(
+        noteTable,
+        {
+          textColumn: text,
+          syncColumn: 0,
+        },
+        where: "id = ? ",
+        whereArgs: [note.id]);
 
     if (updateCount == 0) {
       throw CouldNotUpdateNote();

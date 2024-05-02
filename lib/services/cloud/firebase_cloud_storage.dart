@@ -18,11 +18,19 @@ class FirebaseCloudStorage {
 
   factory FirebaseCloudStorage() => _shared;
 
-  void createNewNote({required String userId}) async {
-    await notes.add({
+  Future<CloudNote> createNewNote({required String userId}) async {
+    final document = await notes.add({
       fieldUserId: userId,
       fieldText: '',
     });
+
+    final fetchedNote = await document.get();
+
+    return CloudNote(
+      id: fetchedNote.id,
+      userId: userId,
+      text: '',
+    );
   }
 
   Future<Iterable<CloudNote>> getNotes({
